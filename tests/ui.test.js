@@ -16,7 +16,7 @@ test('renderList omits phone when empty', () => {
   assert.ok(!renderList([r({ phone: '' })]).includes('tel:'));
 });
 test('renderList shows count summary', () => {
-  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 종각역 반경 1.6km'));
+  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 카카오 추천 상위 45곳'));
 });
 test('escapes name', () => {
   const html = renderList([r({ name: '<b>A&B</b>' })]);
@@ -24,14 +24,14 @@ test('escapes name', () => {
   assert.ok(!html.includes('<b>A'));
 });
 test('renderList shows empty message', () => {
-  assert.ok(renderList([]).includes('이 종류는 주변에 등록된 식당이 없어요.'));
+  assert.ok(renderList([]).includes('이 종류는 주변에 맛집 정보가 없어요.'));
 });
 test('renderError', () => {
   const html = renderError();
   assert.ok(html.includes('식당 정보를 불러오지 못했어요'));
   assert.ok(html.includes('id="retry"') && html.includes('다시 시도'));
 });
-test('renderLoading', () => assert.ok(renderLoading().includes('모으는 중')));
+test('renderLoading', () => assert.ok(renderLoading().includes('불러오는 중')));
 test('renderTabs marks active tab', () => {
   const html = renderTabs(CATEGORIES, 'chinese');
   assert.equal(html.match(/aria-selected="true"/g).length, 1);
@@ -43,5 +43,17 @@ test('renderList empty with walk filter suggests widening', () => {
   assert.ok(html.includes('도보 5분 안에는 식당이 없어요'));
 });
 test('renderList summary mentions walk filter', () => {
-  assert.ok(renderList([r()], { maxWalk: 10 }).includes('1곳 · 도보 10분 이내'));
+  assert.ok(renderList([r()], { maxWalk: 10 }).includes('1곳 · 추천 상위 중 도보 10분 이내'));
+});
+
+test('top mode shows rank badge and summary', () => {
+  const html = renderList([r({ rank: 2 })]);
+  assert.ok(html.includes('추천 2위'));
+  assert.ok(html.includes('1곳 · 카카오 추천 상위 45곳'));
+});
+test('top mode with walk filter summary', () => {
+  assert.ok(renderList([r({ rank: 1 })], { maxWalk: 10 }).includes('1곳 · 추천 상위 중 도보 10분 이내'));
+});
+test('no rank badge without rank', () => {
+  assert.ok(!renderList([r()]).includes('class="rank"'));
 });

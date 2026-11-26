@@ -55,3 +55,8 @@ test('filterByWalk keeps walkMin <= max, 0 means all', () => {
   assert.deepEqual(filterByWalk(list, 10).map(x => x.id), ['a', 'b']);
   assert.deepEqual(filterByWalk(list, 0).map(x => x.id), ['a', 'b', 'c']);
 });
+
+test('sort by rank, missing rank last', () => {
+  const list = [r({ id: 'a', rank: 3 }), r({ id: 'b' }), r({ id: 'c', rank: 1 })];
+  assert.deepEqual(sortRestaurants(list, 'rank').map(x => x.id), ['c', 'a', 'b']);
+});

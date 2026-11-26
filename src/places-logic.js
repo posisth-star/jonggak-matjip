@@ -46,6 +46,7 @@ export function toRestaurant(doc, center = CENTER) {
 export function sortRestaurants(list, sortBy) {
   const copy = [...list];
   if (sortBy === 'name') copy.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  else if (sortBy === 'rank') copy.sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
   else copy.sort((a, b) => a.distanceM - b.distanceM);
   return copy;
 }

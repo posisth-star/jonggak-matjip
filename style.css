@@ -22,3 +22,4 @@ h1 { font-size: 1.4rem; margin: 0 0 4px; }
 .btn { border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:.85rem; color:var(--fg); text-decoration:none; }
 .btn:hover { border-color: var(--accent); }
 #footer { color:var(--muted); font-size:.8rem; padding:24px 16px 40px; }
+.rank { display:inline-block; font-size:.75rem; font-weight:600; color:#fff; background:var(--accent); border-radius:6px; padding:1px 6px; margin-right:4px; vertical-align:middle; }

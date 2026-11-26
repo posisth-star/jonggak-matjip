@@ -15,7 +15,7 @@ export function renderTabs(categories, activeKey) {
 function renderCard(x) {
   const phone = x.phone ? `<a class="phone" href="tel:${esc(x.phone)}">${esc(x.phone)}</a>` : '';
   return `<li class="card">
-  <div class="card-head"><h3>${esc(x.name)}</h3><span class="walk">도보 ${x.walkMin}분</span></div>
+  <div class="card-head"><h3>${x.rank ? `<span class="rank">추천 ${x.rank}위</span> ` : ''}${esc(x.name)}</h3><span class="walk">도보 ${x.walkMin}분</span></div>
   <div class="meta">${x.subCategory ? `<span class="sub">${esc(x.subCategory)}</span>` : ''}${phone}</div>
   <div class="links">${link(x.naverUrl, '네이버에서 보기')}${link(x.kakaoUrl, '카카오맵에서 보기')}</div>
 </li>`;
@@ -25,14 +25,14 @@ export function renderList(list, { maxWalk = 0 } = {}) {
   if (!list.length) {
     return maxWalk > 0
       ? `<p class="notice">도보 ${maxWalk}분 안에는 식당이 없어요. 거리를 넓혀 보세요.</p>`
-      : '<p class="notice">이 종류는 주변에 등록된 식당이 없어요.</p>';
+      : '<p class="notice">이 종류는 주변에 맛집 정보가 없어요.</p>';
   }
-  const scope = maxWalk > 0 ? `도보 ${maxWalk}분 이내` : '종각역 반경 1.6km';
+  const scope = maxWalk > 0 ? `추천 상위 중 도보 ${maxWalk}분 이내` : '카카오 추천 상위 45곳';
   return `<p class="summary">${list.length}곳 · ${scope}</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
 }
 
 export function renderLoading() {
-  return '<p class="notice">식당 정보를 모으는 중이에요… (처음엔 몇 초 걸려요)</p>';
+  return '<p class="notice">맛집 정보를 불러오는 중이에요…</p>';
 }
 
 export function renderError() {

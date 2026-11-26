@@ -1,11 +1,11 @@
 // 페이지 진입점: SDK 로드 → 탭 전환 → 정렬 → 렌더
-import { CATEGORIES } from './categories.js';
+import { CATEGORIES, CENTER } from './categories.js';
 import { sortRestaurants, filterByWalk } from './places-logic.js';
 import { createFetcher, withTimeout } from './kakao.js';
 import { renderTabs, renderList, renderLoading, renderError } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { active: CATEGORIES[0].key, sortBy: 'distance', maxWalk: 0, data: null, fetchFor: null };
+const state = { active: CATEGORIES[0].key, sortBy: 'rank', maxWalk: 0, data: null, fetchFor: null };
 
 export function loadKakaoSdk(appKey) {
   return new Promise((resolve, reject) => {
@@ -57,10 +57,11 @@ async function main() {
     $('list').innerHTML = renderError();
     return;
   }
-  const { services, LatLng, LatLngBounds } = window.kakao.maps;
+  const { services, LatLng } = window.kakao.maps;
   const places = new services.Places();
   const sdk = {
-    toBounds: (r) => new LatLngBounds(new LatLng(r.sw.lat, r.sw.lng), new LatLng(r.ne.lat, r.ne.lng)),
+    location: new LatLng(CENTER.lat, CENTER.lng),
+    sortAccuracy: services.SortBy.ACCURACY,
     Status: services.Status,
   };
   state.fetchFor = createFetcher(places.keywordSearch.bind(places), sdk);
