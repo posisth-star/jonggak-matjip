@@ -10,7 +10,7 @@ const food = (key, label) => ({ key, label, query: label, groupCode: 'FD6', matc
 
 export const CATEGORIES = [
   // 전체: 음식점(FD6) 전체를 카카오 추천순으로. 키워드가 필수라 '맛집'을 쓰고, 종류 필터는 하지 않는다.
-  { key: 'all', label: '전체', query: '맛집', groupCode: 'FD6', match: null },
+  { key: 'all', label: '전체', query: '맛집', groupCode: 'FD6', match: null, exclude: ['패스트푸드', '간식', '식품판매'] },
   food('korean', '한식'),
   food('chinese', '중식'),
   food('japanese', '일식'),

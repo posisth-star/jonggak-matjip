@@ -21,8 +21,9 @@ export function naverSearchUrl(name) {
 }
 
 export function matchesCategory(categoryName, category) {
-  if (category.match == null) return true;
   const second = String(categoryName ?? '').split(' > ')[1] ?? '';
+  if (category.exclude?.some((x) => second.includes(x))) return false; // 전체 탭: 패스트푸드·간식·식품판매 제외
+  if (category.match == null) return true;
   return second.includes(category.match);
 }
 

@@ -60,3 +60,12 @@ test('sort by rank, missing rank last', () => {
   const list = [r({ id: 'a', rank: 3 }), r({ id: 'b' }), r({ id: 'c', rank: 1 })];
   assert.deepEqual(sortRestaurants(list, 'rank').map(x => x.id), ['c', 'a', 'b']);
 });
+
+import { CATEGORIES as CATS } from '../src/categories.js';
+test('전체 category excludes fast food, bakery/snacks and food shops', () => {
+  const all = CATS.find(c => c.key === 'all');
+  assert.equal(matchesCategory('음식점 > 패스트푸드 > 버거킹', all), false);
+  assert.equal(matchesCategory('음식점 > 간식 > 제과,베이커리', all), false);
+  assert.equal(matchesCategory('음식점 > 식품판매', all), false);
+  assert.equal(matchesCategory('음식점 > 한식 > 국밥', all), true);
+});
