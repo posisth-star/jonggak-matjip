@@ -123,3 +123,27 @@ test('파파이스 is removed by name even though Kakao files it under 양식 > 
   const out = await createFetcher(s, sdk)('western');
   assert.deepEqual(out.map(x => x.id), ['b']);
 });
+
+// ---- 추천 = 9개 메뉴 탭을 합친 목록 ----
+test('추천 tab loads every menu tab, interleaves their ranks, reports progress, and reuses them', async () => {
+  const byQuery = {
+    '국밥': [doc('s1', 100, '음식점 > 한식 > 국밥'), doc('s2', 100, '음식점 > 한식 > 국밥')],
+    '칼국수': [doc('n1', 100, '음식점 > 한식 > 국수 > 칼국수')],
+    '중식': [doc('c1', 100, '음식점 > 중식 > 중국요리'), doc('s1', 100, '음식점 > 한식 > 국밥')],
+  };
+  const calls = [];
+  const s = (q, cb, o) => { calls.push(q); const d = o.page === 1 ? (byQuery[q] ?? []) : []; setTimeout(() => cb(d, d.length ? 'OK' : 'ZERO', { hasNextPage: false }), 0); };
+  const f = createFetcher(s, sdk);
+  const progress = [];
+  const out = await f('all', 10, { onProgress: (done, total) => progress.push([done, total]) });
+  const menuTabs = CATEGORIES.filter(c => c.key !== 'all');
+  assert.equal(progress.length, menuTabs.length);
+  assert.deepEqual(progress[progress.length - 1], [menuTabs.length, menuTabs.length]);
+  // 탭 순서대로 1위끼리 먼저: 국밥·탕 1위(s1), 면 1위(n1), 중식 1위(c1), 그다음 국밥·탕 2위(s2). 중식 탭의 s1은 중복이라 한 번만
+  assert.deepEqual(out.map(x => x.id), ['s1', 'n1', 'c1', 's2']);
+  assert.deepEqual(out.map(x => x.rank), [1, 2, 3, 4]);
+  const n = calls.length;
+  await f('soup', 10);
+  await f('chinese', 10);
+  assert.equal(calls.length, n); // 탭을 눌러도 이미 받아 둔 걸 써서 추가 호출 없음
+});

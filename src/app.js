@@ -39,8 +39,15 @@ async function show(key) {
   state.data = null;
   paint();
   $('list').innerHTML = renderLoading();
+  // 추천 탭은 9개 탭을 모두 받으므로, 받는 만큼 진행률 바를 채운다
+  const onProgress = (done, total) => {
+    if (state.active !== key || state.data) return;
+    const pct = Math.round((done / total) * 100);
+    const bar = $('list').querySelector('.progress');
+    if (bar) { bar.setAttribute('aria-valuenow', String(pct)); bar.firstElementChild.style.width = `${pct}%`; }
+  };
   try {
-    const data = await state.fetchFor(key, range);
+    const data = await state.fetchFor(key, range, { onProgress });
     if (state.active !== key || state.range !== range) return; // 그 사이 탭이나 범위가 바뀌었으면 무시
     state.data = data;
     paint();

@@ -31,7 +31,7 @@ test('renderError', () => {
   assert.ok(html.includes('식당 정보를 불러오지 못했어요'));
   assert.ok(html.includes('id="retry"') && html.includes('다시 시도'));
 });
-test('renderLoading', () => assert.ok(renderLoading().includes('불러오는 중')));
+test('renderLoading', () => assert.ok(renderLoading().includes('맛집을 찾고 있어요')));
 test('renderTabs marks active tab', () => {
   const html = renderTabs(CATEGORIES, 'chinese');
   assert.equal(html.match(/aria-selected="true"/g).length, 1);
@@ -66,4 +66,13 @@ test('summary shows the selected range', () => {
 test('card shows street name when present', () => {
   assert.ok(renderList([r({ street: '종로12길' })]).includes('종로12길'));
   assert.ok(!renderList([r({ street: '' })]).includes('class="addr"'));
+});
+
+test('loading shows the character, the message and a progress bar', () => {
+  const html = renderLoading(3, 9);
+  assert.ok(html.includes('맛집을 찾고 있어요'));
+  assert.ok(html.includes('<svg'));
+  assert.ok(html.includes('role="progressbar"') && html.includes('aria-valuenow="33"'));
+  assert.ok(html.includes('width:33%'));
+  assert.ok(renderLoading().includes('aria-valuenow="0"'));
 });

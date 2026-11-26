@@ -55,20 +55,30 @@ export function searchTop(keywordSearch, query, groupCode, sdk, timeoutMs = DEFA
 
 export function createFetcher(keywordSearch, sdk, options = {}) {
   const cache = new Map();
-  return (categoryKey, rangeMin = 10) => {
+  const fetchTab = (categoryKey, rangeMin = 10, { onProgress } = {}) => {
     const radiusM = RANGES[rangeMin] ?? RADIUS_M;
     const cacheKey = `${rangeMin}:${categoryKey}`;
     if (cache.has(cacheKey)) return cache.get(cacheKey);
     const category = CATEGORIES.find((c) => c.key === categoryKey);
     if (!category) return Promise.reject(new Error(`알 수 없는 종류: ${categoryKey}`));
-    // 탭의 검색어마다 상위 45곳을 받아, 1위끼리·2위끼리 번갈아 합친다
-    const p = Promise.all(category.queries.map((q) =>
-      searchTop(keywordSearch, q, category.groupCode, sdk, options.timeoutMs, radiusM)
-        .then((docs) => docs.filter((d) => matchesCategory(d.category_name, category) && !isExcludedName(d.place_name)))))
-      .then((lists) => dedupeById(mergeRanked(lists).map((d) => toRestaurant(d)).filter((r) => r.distanceM <= radiusM))
-        .map((r, i) => ({ ...r, rank: i + 1 })));
+    let p;
+    if (category.aggregate) {
+      // 추천: 메뉴 탭을 모두 받아(각 탭은 캐시에 남음) 탭 순서대로 1위끼리·2위끼리 번갈아 합친다
+      const tabs = CATEGORIES.filter((c) => !c.aggregate);
+      let done = 0;
+      p = Promise.all(tabs.map((t) => fetchTab(t.key, rangeMin).then((list) => { done += 1; onProgress?.(done, tabs.length); return list; })))
+        .then((lists) => dedupeById(mergeRanked(lists)).map((r, i) => ({ ...r, rank: i + 1 })));
+    } else {
+      // 탭의 검색어마다 상위 45곳을 받아, 1위끼리·2위끼리 번갈아 합친다
+      p = Promise.all(category.queries.map((q) =>
+        searchTop(keywordSearch, q, category.groupCode, sdk, options.timeoutMs, radiusM)
+          .then((docs) => docs.filter((d) => matchesCategory(d.category_name, category) && !isExcludedName(d.place_name)))))
+        .then((lists) => dedupeById(mergeRanked(lists).map((d) => toRestaurant(d)).filter((r) => r.distanceM <= radiusM))
+          .map((r, i) => ({ ...r, rank: i + 1 })));
+    }
     cache.set(cacheKey, p);
     p.catch(() => cache.delete(cacheKey));
     return p;
   };
+  return fetchTab;
 }

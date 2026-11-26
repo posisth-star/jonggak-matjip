@@ -11,13 +11,13 @@ test('tab order and labels (배달앱식 메뉴 탭, 샐러드·도시락 없음
   assert.deepEqual(CATEGORIES.map(c => c.label),
     ['추천', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안']);
 });
-test('every tab: unique key, restaurants only, 1+ search words; 전체 has no path filter', () => {
+test('every menu tab: unique key, restaurants only, 1+ search words; 추천 is built from the menu tabs', () => {
   assert.equal(new Set(CATEGORIES.map(c => c.key)).size, CATEGORIES.length);
   for (const c of CATEGORIES) {
     assert.equal(c.groupCode, 'FD6', c.key);
+    if (c.key === 'all') { assert.equal(c.aggregate, true); continue; }
     assert.ok(Array.isArray(c.queries) && c.queries.length >= 1 && c.queries.every(Boolean), c.key);
-    if (c.key === 'all') assert.equal(c.paths, null);
-    else assert.ok(c.paths.length >= 1, c.key);
+    assert.ok(c.paths.length >= 1, c.key);
   }
 });
 test('tabs match the right Kakao categories', () => {
