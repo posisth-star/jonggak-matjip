@@ -1,4 +1,6 @@
 // 화면 조각을 HTML 문자열로 만드는 순수 함수들
+import { ORIGIN_NAME, WALK_LIMIT_MIN } from './categories.js';
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -27,7 +29,7 @@ export function renderList(list, { maxWalk = 0 } = {}) {
       ? `<p class="notice">도보 ${maxWalk}분 안에는 식당이 없어요. 거리를 넓혀 보세요.</p>`
       : '<p class="notice">이 종류는 주변에 맛집 정보가 없어요.</p>';
   }
-  const scope = maxWalk > 0 ? `추천 상위 중 도보 ${maxWalk}분 이내` : '카카오 추천 상위 45곳';
+  const scope = `${ORIGIN_NAME}에서 도보 ${maxWalk > 0 ? maxWalk : WALK_LIMIT_MIN}분 이내 · 카카오 추천순`;
   return `<p class="summary">${list.length}곳 · ${scope}</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
 }
 

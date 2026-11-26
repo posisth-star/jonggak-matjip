@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CATEGORIES, CENTER, RADIUS_M } from '../src/categories.js';
+import { CATEGORIES, CENTER, RADIUS_M, ORIGIN_NAME, WALK_LIMIT_MIN } from '../src/categories.js';
+import { walkMinutes } from '../src/places-logic.js';
 
 test('categories have unique keys', () => {
   const keys = CATEGORIES.map(c => c.key);
@@ -12,17 +13,23 @@ test('every category has query and groupCode', () => {
     assert.ok(['FD6', 'CE7'].includes(c.groupCode), c.key);
   }
 });
-test('only cafe uses CE7 with null match', () => {
+test('only cafe uses CE7; cafe and 전체 have null match', () => {
   for (const c of CATEGORIES) {
     if (c.key === 'cafe') { assert.equal(c.groupCode, 'CE7'); assert.equal(c.match, null); }
+    else if (c.key === 'all') { assert.equal(c.groupCode, 'FD6'); assert.equal(c.match, null); }
     else { assert.equal(c.groupCode, 'FD6'); assert.ok(c.match); }
   }
 });
 test('category order matches spec', () => {
-  assert.deepEqual(CATEGORIES.map(c => c.label), ['한식', '중식', '일식', '양식', '분식', '아시아음식', '카페']);
+  assert.deepEqual(CATEGORIES.map(c => c.label), ['전체', '한식', '중식', '일식', '양식', '분식', '아시아음식', '카페']);
 });
-test('center and radius match spec', () => {
-  assert.equal(RADIUS_M, 1600);
-  assert.ok(Math.abs(CENTER.lat - 37.5702) < 0.002);
-  assert.ok(Math.abs(CENTER.lng - 126.9831) < 0.002);
+test('origin is 알파빌딩 (서울 종로구 종로 34)', () => {
+  assert.ok(Math.abs(CENTER.lat - 37.5698358) < 0.0002);
+  assert.ok(Math.abs(CENTER.lng - 126.9811326) < 0.0002);
+  assert.match(ORIGIN_NAME, /알파빌딩/);
+});
+test('radius is the 20-minute walk boundary', () => {
+  assert.equal(WALK_LIMIT_MIN, 20);
+  assert.ok(walkMinutes(RADIUS_M) <= 20);
+  assert.ok(walkMinutes(RADIUS_M + 40) > 20);
 });
