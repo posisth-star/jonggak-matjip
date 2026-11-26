@@ -71,3 +71,22 @@ test('filters other categories and dedupes', async () => {
   assert.deepEqual(out.map(x => x.id), ['1']);
   assert.equal(out[0].name, 'P1');
 });
+
+test('times out when callback never comes', async () => {
+  const never = () => {};
+  await assert.rejects(searchAllPages(never, korean, sdk, 20), /시간 초과/);
+});
+test('rejects when keywordSearch throws on a later page', async () => {
+  let n = 0;
+  const s = (q, cb) => { if (++n === 2) throw new Error('boom'); setTimeout(() => cb(page15(1), 'OK', { hasNextPage: true }), 0); };
+  await assert.rejects(searchAllPages(s, korean, sdk, 1000), /boom/);
+});
+test('fetcher retries after timeout', async () => {
+  let hang = true; let calls = 0;
+  const s = (q, cb) => { calls++; if (!hang) setTimeout(() => cb([doc('1')], 'OK', { hasNextPage: false }), 0); };
+  const f = createFetcher(s, sdk, 20);
+  await assert.rejects(f('korean'));
+  hang = false;
+  assert.equal((await f('korean')).length, 1);
+  assert.equal(calls, 2);
+});

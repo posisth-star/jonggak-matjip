@@ -31,5 +31,5 @@ export function renderLoading() {
 }
 
 export function renderError() {
-  return '<p class="notice error">식당 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>';
+  return '<p class="notice error">식당 정보를 불러오지 못했어요. <button type="button" id="retry" class="btn">다시 시도</button></p>';
 }

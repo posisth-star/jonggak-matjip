@@ -26,7 +26,11 @@ test('escapes name', () => {
 test('renderList shows empty message', () => {
   assert.ok(renderList([]).includes('이 종류는 주변에 등록된 식당이 없어요.'));
 });
-test('renderError', () => assert.ok(renderError().includes('식당 정보를 불러오지 못했어요')));
+test('renderError', () => {
+  const html = renderError();
+  assert.ok(html.includes('식당 정보를 불러오지 못했어요'));
+  assert.ok(html.includes('id="retry"') && html.includes('다시 시도'));
+});
 test('renderLoading', () => assert.ok(renderLoading().includes('불러오는 중')));
 test('renderTabs marks active tab', () => {
   const html = renderTabs(CATEGORIES, 'chinese');
