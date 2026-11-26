@@ -10,18 +10,17 @@ test('categories have unique keys', () => {
 test('every category has query and groupCode', () => {
   for (const c of CATEGORIES) {
     assert.ok(c.query, c.key);
-    assert.ok(['FD6', 'CE7'].includes(c.groupCode), c.key);
+    assert.equal(c.groupCode, 'FD6', c.key);
   }
 });
-test('only cafe uses CE7; cafe and 전체 have null match', () => {
+test('all categories are restaurants (FD6); only 전체 has null match', () => {
   for (const c of CATEGORIES) {
-    if (c.key === 'cafe') { assert.equal(c.groupCode, 'CE7'); assert.equal(c.match, null); }
-    else if (c.key === 'all') { assert.equal(c.groupCode, 'FD6'); assert.equal(c.match, null); }
+    if (c.key === 'all') { assert.equal(c.groupCode, 'FD6'); assert.equal(c.match, null); }
     else { assert.equal(c.groupCode, 'FD6'); assert.ok(c.match); }
   }
 });
 test('category order matches spec', () => {
-  assert.deepEqual(CATEGORIES.map(c => c.label), ['전체', '한식', '중식', '일식', '양식', '분식', '아시아음식', '카페']);
+  assert.deepEqual(CATEGORIES.map(c => c.label), ['전체', '한식', '중식', '일식', '양식', '분식', '아시아음식']);
 });
 test('origin is 알파빌딩 (서울 종로구 종로 34)', () => {
   assert.ok(Math.abs(CENTER.lat - 37.5698358) < 0.0002);

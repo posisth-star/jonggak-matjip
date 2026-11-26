@@ -5,7 +5,6 @@ import { CATEGORIES, CENTER, RADIUS_M } from '../src/categories.js';
 
 const sdk = { toBounds: (r) => r, sortAccuracy: 'ACC', Status: { OK: 'OK', ZERO_RESULT: 'ZERO', ERROR: 'ERR' } };
 const korean = CATEGORIES.find(c => c.key === 'korean');
-const cafe = CATEGORIES.find(c => c.key === 'cafe');
 const doc = (id, distance = 100, cat = '음식점 > 한식 > 국수') =>
   ({ id: String(id), place_name: 'P' + id, category_name: cat, distance: String(distance), phone: '', place_url: 'u' + id, x: String(CENTER.lng), y: String(CENTER.lat) });
 
@@ -48,11 +47,6 @@ test('stops when no next page', async () => {
 });
 test('ZERO_RESULT → empty', async () => {
   assert.deepEqual(await searchTop(fakeRanked([]), korean, sdk), []);
-});
-test('cafe uses CE7', async () => {
-  const s = fakeRanked([doc('c', 10, '음식점 > 카페')]);
-  await searchTop(s, cafe, sdk);
-  assert.equal(s.calls[0].o.category_group_code, 'CE7');
 });
 test('fetcher adds rank in Kakao order, drops other categories and outside radius', async () => {
   const docs = [doc('a', 100), doc('x', 50, '음식점 > 중식 > 중국요리'), doc('b', 1700), doc('c', 900), doc('a', 100)];
