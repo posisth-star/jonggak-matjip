@@ -16,7 +16,7 @@ test('renderList omits phone when empty', () => {
   assert.ok(!renderList([r({ phone: '' })]).includes('tel:'));
 });
 test('renderList shows count summary', () => {
-  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 가까운 순 최대 45곳'));
+  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 종각역 반경 1.6km'));
 });
 test('escapes name', () => {
   const html = renderList([r({ name: '<b>A&B</b>' })]);
@@ -31,7 +31,7 @@ test('renderError', () => {
   assert.ok(html.includes('식당 정보를 불러오지 못했어요'));
   assert.ok(html.includes('id="retry"') && html.includes('다시 시도'));
 });
-test('renderLoading', () => assert.ok(renderLoading().includes('불러오는 중')));
+test('renderLoading', () => assert.ok(renderLoading().includes('모으는 중')));
 test('renderTabs marks active tab', () => {
   const html = renderTabs(CATEGORIES, 'chinese');
   assert.equal(html.match(/aria-selected="true"/g).length, 1);

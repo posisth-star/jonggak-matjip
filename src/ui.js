@@ -23,11 +23,11 @@ function renderCard(x) {
 
 export function renderList(list) {
   if (!list.length) return '<p class="notice">이 종류는 주변에 등록된 식당이 없어요.</p>';
-  return `<p class="summary">${list.length}곳 · 가까운 순 최대 45곳</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
+  return `<p class="summary">${list.length}곳 · 종각역 반경 1.6km</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
 }
 
 export function renderLoading() {
-  return '<p class="notice">식당 정보를 불러오는 중이에요…</p>';
+  return '<p class="notice">식당 정보를 모으는 중이에요… (처음엔 몇 초 걸려요)</p>';
 }
 
 export function renderError() {

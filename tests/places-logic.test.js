@@ -37,3 +37,14 @@ test('dedupeById keeps first', () => {
   const out = dedupeById([r({ id: 'x', name: '첫' }), r({ id: 'x', name: '둘' }), r({ id: 'y' })]);
   assert.deepEqual(out.map(x => x.name), ['첫', 'A']);
 });
+
+import { distanceBetween } from '../src/places-logic.js';
+test('distanceBetween: 위도 0.008983도 ≈ 1000m', () => {
+  const d = distanceBetween({ lat: 37.5702, lng: 126.9831 }, { lat: 37.579183, lng: 126.9831 });
+  assert.ok(Math.abs(d - 1000) < 5, String(d));
+});
+test('toRestaurant computes distance from coords when distance missing', () => {
+  const x = toRestaurant({ id: '9', place_name: 'B', category_name: '음식점 > 한식', x: '126.9831', y: '37.579183', place_url: 'u' }, { lat: 37.5702, lng: 126.9831 });
+  assert.ok(Math.abs(x.distanceM - 1000) < 5);
+  assert.equal(x.walkMin, 16);
+});
