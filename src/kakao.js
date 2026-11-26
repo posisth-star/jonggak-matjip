@@ -1,4 +1,5 @@
-// 카카오 장소 검색: 반경을 격자로 나눠 구역별로 검색하고, 45건 한도를 넘는 구역은 4등분해 다시 검색한다.
+// 카카오 장소 검색: 반경을 격자로 나눠 구역별로 검색하고, 45건 한도에 닿은 구역은 4등분해 다시 검색한다.
+// (카카오 totalCount는 45에서 잘려 오므로 '45 이상'을 한도 도달로 본다)
 // 장소 정보는 저장하지 않고 페이지가 열려 있는 동안 메모리에만 둔다.
 import { CATEGORIES, CENTER, RADIUS_M } from './categories.js';
 import { toRestaurant, matchesCategory, dedupeById } from './places-logic.js';
@@ -56,7 +57,7 @@ function searchPage(keywordSearch, category, sdk, rect, page, timeoutMs) {
 }
 
 export async function collectArea(keywordSearch, category, sdk, {
-  center = CENTER, radiusM = RADIUS_M, gridN = 4, maxDepth = 3, maxRequests = 400, concurrency = 6, timeoutMs = DEFAULT_TIMEOUT_MS,
+  center = CENTER, radiusM = RADIUS_M, gridN = 4, maxDepth = 4, maxRequests = 600, concurrency = 6, timeoutMs = DEFAULT_TIMEOUT_MS,
 } = {}) {
   const queue = makeGrid(center, radiusM, gridN).map((rect) => ({ rect, depth: 0 }));
   const docs = [];
@@ -65,7 +66,7 @@ export async function collectArea(keywordSearch, category, sdk, {
   async function handle({ rect, depth }) {
     requests++;
     const first = await searchPage(keywordSearch, category, sdk, rect, 1, timeoutMs);
-    if (first.total > MAX_VISIBLE && depth < maxDepth && requests + 4 <= maxRequests) {
+    if (first.total >= MAX_VISIBLE && depth < maxDepth && requests + 4 <= maxRequests) {
       queue.push(...splitRect(rect).map((r) => ({ rect: r, depth: depth + 1 })));
       return;
     }

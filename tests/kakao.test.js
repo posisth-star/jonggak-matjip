@@ -23,7 +23,7 @@ function fakeSearch(places, { status } = {}) {
       const visible = inside.slice(0, 45);
       const page = visible.slice((o.page - 1) * 15, o.page * 15);
       if (!page.length) return cb([], 'ZERO', { totalCount: 0, hasNextPage: false });
-      cb(page, 'OK', { totalCount: inside.length, hasNextPage: o.page * 15 < visible.length });
+      cb(page, 'OK', { totalCount: Math.min(inside.length, 45), hasNextPage: o.page * 15 < visible.length });
     }, 0);
   };
   fn.calls = calls;
@@ -108,4 +108,10 @@ test('times out when callback never comes', async () => {
 test('rejects when keywordSearch throws', async () => {
   const s = () => { throw new Error('boom'); };
   await assert.rejects(collectArea(s, korean, sdk, { center: CENTER, radiusM: RADIUS_M }), /boom/);
+});
+
+test('subdivides when a cell hits the 45 cap even though totalCount is capped', async () => {
+  const places = spread(2000);
+  const docs = await collectArea(fakeSearch(places), korean, sdk, { center: CENTER, radiusM: RADIUS_M, maxRequests: 3000 });
+  assert.equal(new Set(docs.map(d => d.id)).size, 2000);
 });
