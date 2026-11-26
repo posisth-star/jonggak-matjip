@@ -8,7 +8,7 @@ h1 { font-size: 1.4rem; margin: 0 0 4px; }
 #tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; }
 .tab { flex:0 0 auto; border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 14px; font-size:.95rem; cursor:pointer; }
 .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-.controls { margin: 8px auto; color: var(--muted); font-size:.9rem; }
+.controls { margin: 8px auto; color: var(--muted); font-size:.9rem; display:flex; flex-wrap:wrap; gap:12px; }
 .summary, .notice { color: var(--muted); font-size:.9rem; }
 .notice.error { color: #c92a2a; }
 .cards { list-style:none; padding:0; margin:0; display:grid; gap:10px; }

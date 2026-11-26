@@ -48,3 +48,10 @@ test('toRestaurant computes distance from coords when distance missing', () => {
   assert.ok(Math.abs(x.distanceM - 1000) < 5);
   assert.equal(x.walkMin, 16);
 });
+
+import { filterByWalk } from '../src/places-logic.js';
+test('filterByWalk keeps walkMin <= max, 0 means all', () => {
+  const list = [r({ id: 'a', walkMin: 3 }), r({ id: 'b', walkMin: 10 }), r({ id: 'c', walkMin: 11 })];
+  assert.deepEqual(filterByWalk(list, 10).map(x => x.id), ['a', 'b']);
+  assert.deepEqual(filterByWalk(list, 0).map(x => x.id), ['a', 'b', 'c']);
+});

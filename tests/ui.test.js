@@ -37,3 +37,11 @@ test('renderTabs marks active tab', () => {
   assert.equal(html.match(/aria-selected="true"/g).length, 1);
   assert.match(html, /data-key="chinese"[^>]*aria-selected="true"/);
 });
+
+test('renderList empty with walk filter suggests widening', () => {
+  const html = renderList([], { maxWalk: 5 });
+  assert.ok(html.includes('도보 5분 안에는 식당이 없어요'));
+});
+test('renderList summary mentions walk filter', () => {
+  assert.ok(renderList([r()], { maxWalk: 10 }).includes('1곳 · 도보 10분 이내'));
+});

@@ -50,6 +50,10 @@ export function sortRestaurants(list, sortBy) {
   return copy;
 }
 
+export function filterByWalk(list, maxMin) {
+  return maxMin > 0 ? list.filter((x) => x.walkMin <= maxMin) : list;
+}
+
 export function dedupeById(list) {
   const seen = new Set();
   return list.filter(x => (seen.has(x.id) ? false : seen.add(x.id)));

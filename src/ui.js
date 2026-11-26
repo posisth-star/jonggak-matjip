@@ -21,9 +21,14 @@ function renderCard(x) {
 </li>`;
 }
 
-export function renderList(list) {
-  if (!list.length) return '<p class="notice">이 종류는 주변에 등록된 식당이 없어요.</p>';
-  return `<p class="summary">${list.length}곳 · 종각역 반경 1.6km</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
+export function renderList(list, { maxWalk = 0 } = {}) {
+  if (!list.length) {
+    return maxWalk > 0
+      ? `<p class="notice">도보 ${maxWalk}분 안에는 식당이 없어요. 거리를 넓혀 보세요.</p>`
+      : '<p class="notice">이 종류는 주변에 등록된 식당이 없어요.</p>';
+  }
+  const scope = maxWalk > 0 ? `도보 ${maxWalk}분 이내` : '종각역 반경 1.6km';
+  return `<p class="summary">${list.length}곳 · ${scope}</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
 }
 
 export function renderLoading() {

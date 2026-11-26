@@ -1,11 +1,11 @@
 // 페이지 진입점: SDK 로드 → 탭 전환 → 정렬 → 렌더
 import { CATEGORIES } from './categories.js';
-import { sortRestaurants } from './places-logic.js';
+import { sortRestaurants, filterByWalk } from './places-logic.js';
 import { createFetcher, withTimeout } from './kakao.js';
 import { renderTabs, renderList, renderLoading, renderError } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { active: CATEGORIES[0].key, sortBy: 'distance', data: null, fetchFor: null };
+const state = { active: CATEGORIES[0].key, sortBy: 'distance', maxWalk: 0, data: null, fetchFor: null };
 
 export function loadKakaoSdk(appKey) {
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ export function loadKakaoSdk(appKey) {
 
 function paint() {
   $('tabs').innerHTML = renderTabs(CATEGORIES, state.active);
-  if (state.data) $('list').innerHTML = renderList(sortRestaurants(state.data, state.sortBy));
+  if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), { maxWalk: state.maxWalk });
 }
 
 async function show(key) {
@@ -69,7 +69,8 @@ async function main() {
     const btn = ev.target.closest('[data-key]');
     if (btn && (btn.dataset.key !== state.active || !state.data)) show(btn.dataset.key);
   });
-  $('sortBy').addEventListener('change', (ev) => { state.sortBy = ev.target.value; paint(); });
+  $('sortBy')?.addEventListener('change', (ev) => { state.sortBy = ev.target.value; paint(); });
+  $('maxWalk')?.addEventListener('change', (ev) => { state.maxWalk = Number(ev.target.value); paint(); });
   show(state.active);
 }
 
