@@ -16,8 +16,16 @@ export function distanceBetween(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-export function naverSearchUrl(name) {
-  return NAVER_SEARCH + encodeURIComponent(`${name} 종각`);
+// 네이버 지도 검색어에 붙일 위치 단서: 도로명(예: 종로3길) → 동 이름(예: 관철동) → '종각'
+export function naverHint(doc) {
+  const road = String(doc?.road_address_name ?? '').split(' ')[2];
+  if (road) return road;
+  const dong = String(doc?.address_name ?? '').split(' ')[2];
+  return dong || '종각';
+}
+
+export function naverSearchUrl(name, hint) {
+  return NAVER_SEARCH + encodeURIComponent([name, hint].filter(Boolean).join(' '));
 }
 
 // 점심 맛집이 목적이라 술집(호프·요리주점·이자카야 등)은 모든 종류에서 뺀다
@@ -52,7 +60,7 @@ export function toRestaurant(doc, center = CENTER) {
     walkMin: walkMinutes(distanceM),
     phone: doc.phone ?? '',
     kakaoUrl: doc.place_url,
-    naverUrl: naverSearchUrl(doc.place_name),
+    naverUrl: naverSearchUrl(doc.place_name, naverHint(doc)),
   };
 }
 

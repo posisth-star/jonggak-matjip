@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toRestaurant, walkMinutes, naverSearchUrl, matchesCategory, sortRestaurants, dedupeById } from '../src/places-logic.js';
+import { toRestaurant, walkMinutes, naverSearchUrl, naverHint, matchesCategory, sortRestaurants, dedupeById } from '../src/places-logic.js';
 
 const NAVER = 'https://map.naver.com/p/search/';
 const r = (o) => ({ id: '1', name: 'A', subCategory: '', distanceM: 100, walkMin: 2, phone: '', kakaoUrl: '', naverUrl: '', ...o });
@@ -12,13 +12,22 @@ test('toRestaurant parses distance and subCategory', () => {
   assert.equal(x.subCategory, '국수');
   assert.equal(x.walkMin, 7);
   assert.equal(x.kakaoUrl, 'http://place.map.kakao.com/1');
-  assert.equal(x.naverUrl, naverSearchUrl('A'));
+  assert.equal(x.naverUrl, naverSearchUrl('A', '종각'));
   assert.equal(x.phone, '02-1');
 });
-test('naverSearchUrl appends 종각', () =>
-  assert.equal(naverSearchUrl('김밥천국'), NAVER + encodeURIComponent('김밥천국 종각')));
+test('naverSearchUrl joins name and location hint', () =>
+  assert.equal(naverSearchUrl('청진옥', '종로3길'), NAVER + encodeURIComponent('청진옥 종로3길')));
+test('naverHint prefers road name, then 동 name, then 종각', () => {
+  assert.equal(naverHint({ road_address_name: '서울 종로구 종로3길 32', address_name: '서울 종로구 청진동 1' }), '종로3길');
+  assert.equal(naverHint({ road_address_name: '', address_name: '서울 종로구 관철동 13-1' }), '관철동');
+  assert.equal(naverHint({}), '종각');
+});
+test('toRestaurant uses road name in Naver link', () => {
+  const x = toRestaurant({ id: '7', place_name: '청진옥', category_name: '음식점 > 한식 > 해장국', distance: '300', road_address_name: '서울 종로구 종로3길 32', address_name: '서울 종로구 청진동 1', place_url: 'u' });
+  assert.equal(x.naverUrl, NAVER + encodeURIComponent('청진옥 종로3길'));
+});
 test('naverSearchUrl encodes', () => {
-  const path = naverSearchUrl('A&B <#1>').slice(NAVER.length);
+  const path = naverSearchUrl('A&B <#1>', '종각').slice(NAVER.length);
   for (const ch of ['&', '#', ' ', '<']) assert.ok(!path.includes(ch), ch);
 });
 test('matchesCategory with paths', () => {
