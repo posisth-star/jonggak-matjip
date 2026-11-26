@@ -1,6 +1,6 @@
 // 카카오 장소 검색: 종류별로 카카오 추천(정확도) 순 상위 45곳을 받는다.
 // 장소 정보는 저장하지 않고 페이지가 열려 있는 동안 메모리에만 둔다.
-import { CATEGORIES, RADIUS_M } from './categories.js';
+import { CATEGORIES, CENTER, RADIUS_M } from './categories.js';
 import { toRestaurant, matchesCategory, dedupeById } from './places-logic.js';
 
 const PAGE_SIZE = 15;
@@ -13,13 +13,21 @@ export function withTimeout(promise, ms, message = '시간 초과') {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-// 맛집 모드: 카카오 정확도(추천) 순으로 반경 안 상위 45곳을 순서대로 받는다.
+// 반경을 감싸는 정사각형 범위
+export function squareAround(center, radiusM) {
+  const dLat = radiusM / 111320;
+  const dLng = radiusM / (111320 * Math.cos((center.lat * Math.PI) / 180));
+  return { sw: { lat: center.lat - dLat, lng: center.lng - dLng }, ne: { lat: center.lat + dLat, lng: center.lng + dLng } };
+}
+
+// 카카오 정확도(추천) 순 상위 45곳을 순서대로 받는다.
+// 중심점(location)을 주면 카카오가 가까운 곳을 우대하므로, 범위(bounds)만 주고 반경 밖은 나중에 거른다.
 export function searchTop(keywordSearch, category, sdk, timeoutMs = DEFAULT_TIMEOUT_MS) {
   const search = new Promise((resolve, reject) => {
     const docs = [];
     const fetchPage = (page) => {
       try {
-        const options = { location: sdk.location, radius: RADIUS_M, category_group_code: category.groupCode, sort: sdk.sortAccuracy, size: PAGE_SIZE, page };
+        const options = { bounds: sdk.toBounds(squareAround(CENTER, RADIUS_M)), category_group_code: category.groupCode, sort: sdk.sortAccuracy, size: PAGE_SIZE, page };
         keywordSearch(category.query, (result, status, pagination) => {
           if (status === sdk.Status.OK) {
             docs.push(...result);

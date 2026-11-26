@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { searchTop, createFetcher } from '../src/kakao.js';
 import { CATEGORIES, CENTER, RADIUS_M } from '../src/categories.js';
 
-const sdk = { location: 'LOC', sortAccuracy: 'ACC', Status: { OK: 'OK', ZERO_RESULT: 'ZERO', ERROR: 'ERR' } };
+const sdk = { toBounds: (r) => r, sortAccuracy: 'ACC', Status: { OK: 'OK', ZERO_RESULT: 'ZERO', ERROR: 'ERR' } };
 const korean = CATEGORIES.find(c => c.key === 'korean');
 const cafe = CATEGORIES.find(c => c.key === 'cafe');
 const doc = (id, distance = 100, cat = '음식점 > 한식 > 국수') =>
@@ -26,12 +26,18 @@ function fakeRanked(docs, { status } = {}) {
 }
 const ranked = (n) => Array.from({ length: n }, (_, i) => doc('r' + i, 10 * i));
 
-test('searchTop asks accuracy order around center and keeps order over 3 pages', async () => {
+test('searchTop asks accuracy order within square bounds (no center) and keeps order over 3 pages', async () => {
   const s = fakeRanked(ranked(60));
   const docs = await searchTop(s, korean, sdk);
   assert.equal(docs.length, 45);
   assert.equal(s.calls.length, 3);
-  assert.deepEqual(s.calls[0].o, { location: 'LOC', radius: RADIUS_M, category_group_code: 'FD6', sort: 'ACC', size: 15, page: 1 });
+  const o = s.calls[0].o;
+  assert.equal(o.location, undefined); // 중심점을 주면 카카오가 가까운 곳을 우대하므로 주지 않는다
+  assert.equal(o.radius, undefined);
+  assert.deepEqual({ ...o, bounds: undefined }, { bounds: undefined, category_group_code: 'FD6', sort: 'ACC', size: 15, page: 1 });
+  const M = 111320, dLng = RADIUS_M / (M * Math.cos(CENTER.lat * Math.PI / 180));
+  assert.ok(Math.abs(o.bounds.sw.lat - (CENTER.lat - RADIUS_M / M)) < 1e-6);
+  assert.ok(Math.abs(o.bounds.ne.lng - (CENTER.lng + dLng)) < 1e-6);
   assert.equal(s.calls[0].q, '한식');
   assert.equal(docs[44].id, 'r44');
 });
