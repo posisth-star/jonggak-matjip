@@ -1,10 +1,10 @@
-// 출발지(알파빌딩, 서울 종로구 종로 34)와 도보 20분 반경, 음식 종류 정의
+// 출발지(알파빌딩, 서울 종로구 종로 34)와 도보 15분 반경, 음식 종류 정의
 export const ORIGIN_NAME = '알파빌딩';
 export const ORIGIN_ADDRESS = '서울 종로구 종로 34';
 export const CENTER = { lat: 37.5698358, lng: 126.9811326 }; // 카카오 장소 검색 '알파빌딩' 좌표
-export const WALK_LIMIT_MIN = 20;
-// 도보 시간 = 직선거리 × 1.3 ÷ 80m/분 → 20분 = 약 1,230m
-export const RADIUS_M = 1230;
+export const WALK_LIMIT_MIN = 15;
+// 도보 시간 = 직선거리 × 1.3 ÷ 80m/분 → 15분 = 약 920m (점심시간에 다녀오기 좋은 거리)
+export const RADIUS_M = 920;
 
 const food = (key, label) => ({ key, label, query: label, groupCode: 'FD6', match: label });
 

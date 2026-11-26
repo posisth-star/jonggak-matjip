@@ -27,8 +27,8 @@ test('origin is 알파빌딩 (서울 종로구 종로 34)', () => {
   assert.ok(Math.abs(CENTER.lng - 126.9811326) < 0.0002);
   assert.match(ORIGIN_NAME, /알파빌딩/);
 });
-test('radius is the 20-minute walk boundary', () => {
-  assert.equal(WALK_LIMIT_MIN, 20);
-  assert.ok(walkMinutes(RADIUS_M) <= 20);
-  assert.ok(walkMinutes(RADIUS_M + 40) > 20);
+test('radius is the 15-minute walk boundary', () => {
+  assert.equal(WALK_LIMIT_MIN, 15);
+  assert.ok(walkMinutes(RADIUS_M) <= 15);
+  assert.ok(walkMinutes(RADIUS_M + 40) > 15);
 });
