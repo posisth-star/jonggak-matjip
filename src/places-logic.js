@@ -16,12 +16,16 @@ export function distanceBetween(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-// 네이버 지도 검색어에 붙일 위치 단서: 도로명(예: 종로3길) → 동 이름(예: 관철동) → '종각'
-export function naverHint(doc) {
+// 짧은 위치: 도로명(예: 종로3길) → 없으면 동 이름(예: 관철동). 같은 이름 지점 구분과 네이버 검색에 쓴다
+export function streetOf(doc) {
   const road = String(doc?.road_address_name ?? '').split(' ')[2];
   if (road) return road;
-  const dong = String(doc?.address_name ?? '').split(' ')[2];
-  return dong || '종각';
+  return String(doc?.address_name ?? '').split(' ')[2] ?? '';
+}
+
+// 네이버 지도 검색어에 붙일 위치 단서 (주소가 없으면 '종각')
+export function naverHint(doc) {
+  return streetOf(doc) || '종각';
 }
 
 export function naverSearchUrl(name, hint) {
@@ -60,6 +64,7 @@ export function toRestaurant(doc, center = CENTER) {
     walkMin: walkMinutes(distanceM),
     phone: doc.phone ?? '',
     kakaoUrl: doc.place_url,
+    street: streetOf(doc),
     naverUrl: naverSearchUrl(doc.place_name, naverHint(doc)),
   };
 }

@@ -86,3 +86,12 @@ test('bars are excluded from every category (lunch only)', () => {
   assert.equal(matchesCategory('음식점 > 술집 > 일본식주점', CATS.find(c => c.key === 'all')), false);
   assert.equal(matchesCategory('음식점 > 한식 > 국밥', CATS.find(c => c.key === 'all')), true);
 });
+
+test('toRestaurant keeps a short street name to tell branches apart', () => {
+  const a = toRestaurant({ id: '1', place_name: '명동칼국수', category_name: '음식점 > 한식 > 국수', distance: '500', road_address_name: '서울 종로구 종로12길 15', address_name: '서울 종로구 관철동 1', place_url: 'u' });
+  const b = toRestaurant({ id: '2', place_name: '명동칼국수', category_name: '음식점 > 한식 > 국수', distance: '500', road_address_name: '', address_name: '서울 중구 다동 1', place_url: 'u' });
+  const c = toRestaurant({ id: '3', place_name: 'X', category_name: '음식점 > 한식', distance: '1', place_url: 'u' });
+  assert.equal(a.street, '종로12길');
+  assert.equal(b.street, '다동');
+  assert.equal(c.street, '');
+});

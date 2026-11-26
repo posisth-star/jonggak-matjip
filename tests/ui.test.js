@@ -62,3 +62,8 @@ test('summary shows the selected range', () => {
   assert.ok(renderList([r()], { range: 15 }).includes('한국빌딩에서 도보 15분 이내'));
   assert.ok(renderList([r()], { range: 10, maxWalk: 5 }).includes('한국빌딩에서 도보 5분 이내'));
 });
+
+test('card shows street name when present', () => {
+  assert.ok(renderList([r({ street: '종로12길' })]).includes('종로12길'));
+  assert.ok(!renderList([r({ street: '' })]).includes('class="addr"'));
+});

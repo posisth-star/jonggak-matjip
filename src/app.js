@@ -18,8 +18,18 @@ export function loadKakaoSdk(appKey) {
   });
 }
 
+// 탭이 오른쪽으로 더 있으면 끝을 흐리게 표시
+function updateTabFade() {
+  const t = $('tabs');
+  t.parentElement.classList.toggle('more', t.scrollLeft + t.clientWidth < t.scrollWidth - 4);
+}
+
 function paint() {
+  // 탭을 다시 그려도 키보드 포커스가 사라지지 않게, 포커스가 있던 탭을 기억했다가 되돌린다
+  const focusedKey = document.activeElement?.closest?.('#tabs [data-key]')?.dataset.key;
   $('tabs').innerHTML = renderTabs(CATEGORIES, state.active);
+  if (focusedKey) $('tabs').querySelector(`[data-key="${focusedKey}"]`)?.focus({ preventScroll: true });
+  updateTabFade();
   if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), { maxWalk: state.maxWalk, range: state.range });
 }
 
@@ -68,6 +78,8 @@ async function main() {
   };
   state.fetchFor = createFetcher(places.keywordSearch.bind(places), sdk);
 
+  $('tabs').addEventListener('scroll', updateTabFade, { passive: true });
+  window.addEventListener('resize', updateTabFade);
   $('tabs').addEventListener('click', (ev) => {
     const btn = ev.target.closest('[data-key]');
     if (btn && (btn.dataset.key !== state.active || !state.data)) show(btn.dataset.key);
