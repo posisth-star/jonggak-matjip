@@ -6,9 +6,10 @@ import { walkMinutes, matchesCategory } from '../src/places-logic.js';
 const cat = (k) => CATEGORIES.find(c => c.key === k);
 const path = (p) => `음식점 > ${p}`;
 
-test('tab order and labels (배달앱식 메뉴 탭)', () => {
+test('tab order and labels (배달앱식 메뉴 탭, 샐러드·도시락 없음)', () => {
+  assert.ok(!CATEGORIES.some(c => c.key === 'light'));
   assert.deepEqual(CATEGORIES.map(c => c.label),
-    ['추천', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안', '샐러드·도시락']);
+    ['추천', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안']);
 });
 test('every tab: unique key, restaurants only, 1+ search words; 전체 has no path filter', () => {
   assert.equal(new Set(CATEGORIES.map(c => c.key)).size, CATEGORIES.length);
@@ -26,12 +27,11 @@ test('tabs match the right Kakao categories', () => {
     ['noodle', '한식 > 국수 > 칼국수'], ['noodle', '한식 > 냉면'], ['noodle', '일식 > 일본식라면'],
     ['chinese', '중식 > 중국요리'], ['chinese', '중식 > 양꼬치'], ['japanese', '일식 > 돈까스,우동'], ['japanese', '일식 > 초밥,롤'],
     ['western', '양식 > 이탈리안'], ['western', '양식 > 햄버거'], ['snack', '분식 > 떡볶이'], ['asian', '아시아음식 > 동남아음식'],
-    ['light', '샐러드'], ['light', '도시락 > 본도시락'], ['light', '패스트푸드 > 샌드위치'], ['light', '한식 > 죽'],
   ];
   for (const [k, p] of yes) assert.equal(matchesCategory(path(p), cat(k)), true, `${k} ← ${p}`);
   const no = [
     ['meat', '한식 > 국밥'], ['soup', '한식 > 육류,고기'], ['hansik', '한식 > 국밥'], ['hansik', '한식 > 육류,고기'],
-    ['noodle', '일식 > 초밥,롤'], ['western', '패스트푸드 > 버거킹'], ['light', '패스트푸드 > 맥도날드'], ['chinese', '한식'],
+    ['noodle', '일식 > 초밥,롤'], ['western', '패스트푸드 > 버거킹'], ['chinese', '한식'],
   ];
   for (const [k, p] of no) assert.equal(matchesCategory(path(p), cat(k)), false, `${k} ✗ ${p}`);
 });
