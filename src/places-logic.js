@@ -22,8 +22,10 @@ export function naverSearchUrl(name) {
 
 // 점심 맛집이 목적이라 술집(호프·요리주점·이자카야 등)은 모든 종류에서 뺀다
 const LUNCH_EXCLUDE = ['술집'];
-// 카카오가 패스트푸드로 분류하지 않은 체인점은 이름으로 뺀다
-const EXCLUDE_NAMES = ['파파이스'];
+// 직장인 점심 기준으로 맞지 않는 분류(뷔페·패밀리레스토랑, 참치회·횟집·일식집)는 모든 탭에서 뺀다
+const LUNCH_EXCLUDE_PATHS = ['뷔페', '패밀리레스토랑', '일식 > 참치회', '일식 > 일식집', '한식 > 해물,생선 > 회'];
+// 이름으로 빼는 곳: 패스트푸드로 분류되지 않은 체인(파파이스), 점심값이 비싼 고급·호텔 식당
+const EXCLUDE_NAMES = ['파파이스', '호텔', '오마카세', '스테이크하우스', '다이닝', '참치'];
 export const isExcludedName = (name) => EXCLUDE_NAMES.some((x) => String(name ?? '').includes(x));
 
 export function matchesCategory(categoryName, category) {
@@ -31,6 +33,7 @@ export function matchesCategory(categoryName, category) {
   const second = path.split(' > ')[0] ?? '';
   if (!path) return false;
   if (LUNCH_EXCLUDE.some((x) => second.includes(x))) return false;
+  if (LUNCH_EXCLUDE_PATHS.some((p) => path === p || path.startsWith(`${p} > `))) return false;
   if (category.exclude?.some((x) => second.includes(x))) return false; // 전체 탭: 패스트푸드·간식·식품판매 제외
   if (category.paths == null) return true;
   return category.paths.some((p) => (p.endsWith('=') ? path === p.slice(0, -1) : path === p || path.startsWith(`${p} > `)));

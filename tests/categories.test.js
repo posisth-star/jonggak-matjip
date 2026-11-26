@@ -52,3 +52,21 @@ test('default range is 10 minutes; 15-minute range is also available', () => {
   assert.ok(walkMinutes(RANGES[10]) <= 10 && walkMinutes(RANGES[10] + 40) > 10);
   assert.ok(walkMinutes(RANGES[15]) <= 15 && walkMinutes(RANGES[15] + 40) > 15);
 });
+
+// ---- 직장인 점심 기준: 고급·호텔·뷔페, 참치회·횟집·일식집 제외 ----
+import { isExcludedName } from '../src/places-logic.js';
+test('lunch filter: buffets, family restaurants, tuna/sashimi and 일식집 are excluded from every tab', () => {
+  for (const c of CATEGORIES) {
+    for (const p of ['뷔페', '패밀리레스토랑 > 애슐리', '일식 > 참치회', '일식 > 일식집', '한식 > 해물,생선 > 회']) {
+      assert.equal(matchesCategory(path(p), c), false, `${c.key} ✗ ${p}`);
+    }
+  }
+  assert.equal(matchesCategory(path('한식 > 해물,생선'), cat('hansik')), true);
+  assert.equal(matchesCategory(path('일식 > 초밥,롤'), cat('japanese')), true);
+});
+test('lunch filter: pricey names are excluded', () => {
+  for (const n of ['참치공방 을지로점', '포시즌스호텔 서울 유유안', '오마카세 오사이초밥 광화문점', '울프강스테이크하우스 광화문점', '어떤 다이닝', '파파이스 광화문점'])
+    assert.equal(isExcludedName(n), true, n);
+  for (const n of ['진중 우육면관 본점', '스시소라 광화문점', '청진옥'])
+    assert.equal(isExcludedName(n), false, n);
+});
