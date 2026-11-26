@@ -21,11 +21,13 @@ test('naverSearchUrl encodes', () => {
   const path = naverSearchUrl('A&B <#1>').slice(NAVER.length);
   for (const ch of ['&', '#', ' ', '<']) assert.ok(!path.includes(ch), ch);
 });
-test('matchesCategory', () => {
-  assert.equal(matchesCategory('음식점 > 한식 > 국수', { match: '한식' }), true);
-  assert.equal(matchesCategory('음식점 > 중식 > 중국요리', { match: '한식' }), false);
-  assert.equal(matchesCategory('음식점 > 분식', { match: null }), true);
-  assert.equal(matchesCategory('음식점', { match: '한식' }), false);
+test('matchesCategory with paths', () => {
+  assert.equal(matchesCategory('음식점 > 한식 > 국수 > 칼국수', { paths: ['한식 > 국수'] }), true);
+  assert.equal(matchesCategory('음식점 > 한식 > 국수', { paths: ['한식 > 국밥'] }), false);
+  assert.equal(matchesCategory('음식점 > 한식', { paths: ['한식='] }), true);
+  assert.equal(matchesCategory('음식점 > 한식 > 국밥', { paths: ['한식='] }), false);
+  assert.equal(matchesCategory('음식점 > 분식', { paths: null }), true);
+  assert.equal(matchesCategory('음식점', { paths: ['한식'] }), false);
 });
 test('sort distance and name', () => {
   const list = [r({ id: 'a', name: '다', distanceM: 300 }), r({ id: 'b', name: '가', distanceM: 500 }), r({ id: 'c', name: '나', distanceM: 100 })];

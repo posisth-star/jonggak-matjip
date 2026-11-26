@@ -24,11 +24,13 @@ export function naverSearchUrl(name) {
 const LUNCH_EXCLUDE = ['술집'];
 
 export function matchesCategory(categoryName, category) {
-  const second = String(categoryName ?? '').split(' > ')[1] ?? '';
+  const path = String(categoryName ?? '').split(' > ').slice(1).join(' > '); // '음식점' 뒤
+  const second = path.split(' > ')[0] ?? '';
+  if (!path) return false;
   if (LUNCH_EXCLUDE.some((x) => second.includes(x))) return false;
   if (category.exclude?.some((x) => second.includes(x))) return false; // 전체 탭: 패스트푸드·간식·식품판매 제외
-  if (category.match == null) return true;
-  return second.includes(category.match);
+  if (category.paths == null) return true;
+  return category.paths.some((p) => (p.endsWith('=') ? path === p.slice(0, -1) : path === p || path.startsWith(`${p} > `)));
 }
 
 export function toRestaurant(doc, center = CENTER) {
