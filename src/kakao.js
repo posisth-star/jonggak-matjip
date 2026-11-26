@@ -1,7 +1,7 @@
 // 카카오 장소 검색: 탭의 검색어마다 카카오 추천(정확도) 순 상위 45곳을 받아 합친다.
 // 장소 정보는 저장하지 않고 페이지가 열려 있는 동안 메모리에만 둔다.
 import { CATEGORIES, CENTER, RADIUS_M, RANGES } from './categories.js';
-import { toRestaurant, matchesCategory, dedupeById } from './places-logic.js';
+import { toRestaurant, matchesCategory, dedupeById, isExcludedName } from './places-logic.js';
 
 const PAGE_SIZE = 15;
 const MAX_VISIBLE = 45;       // 카카오가 한 검색에 노출하는 최대 건수
@@ -64,7 +64,7 @@ export function createFetcher(keywordSearch, sdk, options = {}) {
     // 탭의 검색어마다 상위 45곳을 받아, 1위끼리·2위끼리 번갈아 합친다
     const p = Promise.all(category.queries.map((q) =>
       searchTop(keywordSearch, q, category.groupCode, sdk, options.timeoutMs, radiusM)
-        .then((docs) => docs.filter((d) => matchesCategory(d.category_name, category)))))
+        .then((docs) => docs.filter((d) => matchesCategory(d.category_name, category) && !isExcludedName(d.place_name)))))
       .then((lists) => dedupeById(mergeRanked(lists).map((d) => toRestaurant(d)).filter((r) => r.distanceM <= radiusM))
         .map((r, i) => ({ ...r, rank: i + 1 })));
     cache.set(cacheKey, p);

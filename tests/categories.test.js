@@ -8,7 +8,7 @@ const path = (p) => `음식점 > ${p}`;
 
 test('tab order and labels (배달앱식 메뉴 탭)', () => {
   assert.deepEqual(CATEGORIES.map(c => c.label),
-    ['전체', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안', '샐러드·도시락']);
+    ['추천', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안', '샐러드·도시락']);
 });
 test('every tab: unique key, restaurants only, 1+ search words; 전체 has no path filter', () => {
   assert.equal(new Set(CATEGORIES.map(c => c.key)).size, CATEGORIES.length);
@@ -41,10 +41,10 @@ test('전체 excludes fast food, snacks/bakery, food shops; every tab excludes b
   assert.equal(matchesCategory(path('한식 > 국밥'), cat('all')), true);
   for (const c of CATEGORIES) assert.equal(matchesCategory(path('술집 > 호프,요리주점'), c), false, c.key);
 });
-test('origin is 알파빌딩 (서울 종로구 종로 34)', () => {
+test('origin is 한국빌딩 (서울 종로구 종로 34)', () => {
   assert.ok(Math.abs(CENTER.lat - 37.5698358) < 0.0002);
   assert.ok(Math.abs(CENTER.lng - 126.9811326) < 0.0002);
-  assert.match(ORIGIN_NAME, /알파빌딩/);
+  assert.match(ORIGIN_NAME, /한국빌딩/);
 });
 test('default range is 10 minutes; 15-minute range is also available', () => {
   assert.equal(WALK_LIMIT_MIN, 10);

@@ -5,7 +5,7 @@ import { createFetcher, withTimeout } from './kakao.js';
 import { renderTabs, renderList, renderLoading, renderError } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
-// range: 검색 범위(10·15분), maxWalk: 그 안에서 더 좁히는 필터(5분)
+// range: 검색 범위(10분), maxWalk: 그 안에서 더 좁히는 필터(5분)
 const state = { active: CATEGORIES[0].key, sortBy: 'rank', range: 10, maxWalk: 0, data: null, fetchFor: null };
 
 export function loadKakaoSdk(appKey) {
@@ -74,10 +74,8 @@ async function main() {
   });
   $('sortBy')?.addEventListener('change', (ev) => { state.sortBy = ev.target.value; paint(); });
   $('maxWalk')?.addEventListener('change', (ev) => {
-    const v = Number(ev.target.value);
-    const range = v === 15 ? 15 : 10;      // 15분은 범위를 넓혀 다시 검색
-    state.maxWalk = v === 5 ? 5 : 0;       // 5분은 10분 목록에서 걸러내기
-    if (range !== state.range) { state.range = range; show(state.active); } else paint();
+    state.maxWalk = Number(ev.target.value) === 5 ? 5 : 0; // 5분은 10분 목록에서 걸러내기
+    paint();
   });
   show(state.active);
 }

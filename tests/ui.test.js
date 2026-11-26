@@ -16,7 +16,7 @@ test('renderList omits phone when empty', () => {
   assert.ok(!renderList([r({ phone: '' })]).includes('tel:'));
 });
 test('renderList shows count summary', () => {
-  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 알파빌딩에서 도보 10분 이내 · 카카오 추천순'));
+  assert.ok(renderList([r(), r({ id: '2' })]).includes('2곳 · 한국빌딩에서 도보 10분 이내 · 카카오 추천순'));
 });
 test('escapes name', () => {
   const html = renderList([r({ name: '<b>A&B</b>' })]);
@@ -43,22 +43,22 @@ test('renderList empty with walk filter suggests widening', () => {
   assert.ok(html.includes('도보 5분 안에는 식당이 없어요'));
 });
 test('renderList summary mentions walk filter', () => {
-  assert.ok(renderList([r()], { maxWalk: 10 }).includes('1곳 · 알파빌딩에서 도보 10분 이내 · 카카오 추천순'));
+  assert.ok(renderList([r()], { maxWalk: 10 }).includes('1곳 · 한국빌딩에서 도보 10분 이내 · 카카오 추천순'));
 });
 
 test('top mode shows rank badge and summary', () => {
   const html = renderList([r({ rank: 2 })]);
   assert.ok(html.includes('추천 2위'));
-  assert.ok(html.includes('1곳 · 알파빌딩에서 도보 10분 이내 · 카카오 추천순'));
+  assert.ok(html.includes('1곳 · 한국빌딩에서 도보 10분 이내 · 카카오 추천순'));
 });
 test('top mode with walk filter summary', () => {
-  assert.ok(renderList([r({ rank: 1 })], { maxWalk: 10 }).includes('1곳 · 알파빌딩에서 도보 10분 이내 · 카카오 추천순'));
+  assert.ok(renderList([r({ rank: 1 })], { maxWalk: 10 }).includes('1곳 · 한국빌딩에서 도보 10분 이내 · 카카오 추천순'));
 });
 test('no rank badge without rank', () => {
   assert.ok(!renderList([r()]).includes('class="rank"'));
 });
 
 test('summary shows the selected range', () => {
-  assert.ok(renderList([r()], { range: 15 }).includes('알파빌딩에서 도보 15분 이내'));
-  assert.ok(renderList([r()], { range: 10, maxWalk: 5 }).includes('알파빌딩에서 도보 5분 이내'));
+  assert.ok(renderList([r()], { range: 15 }).includes('한국빌딩에서 도보 15분 이내'));
+  assert.ok(renderList([r()], { range: 10, maxWalk: 5 }).includes('한국빌딩에서 도보 5분 이내'));
 });

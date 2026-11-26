@@ -117,3 +117,9 @@ test('15-minute range searches a wider square and keeps farther places; cached s
   await f('soup', 15);
   assert.equal(s.calls.length, n * 2);
 });
+
+test('파파이스 is removed by name even though Kakao files it under 양식 > 햄버거', async () => {
+  const s = byQueryFake({ '햄버거': [{ ...doc('p', 100, '음식점 > 양식 > 햄버거'), place_name: '파파이스 광화문점' }, doc('b', 100, '음식점 > 양식 > 햄버거')], '파스타': [], '피자': [] });
+  const out = await createFetcher(s, sdk)('western');
+  assert.deepEqual(out.map(x => x.id), ['b']);
+});

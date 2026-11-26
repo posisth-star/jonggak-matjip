@@ -22,6 +22,9 @@ export function naverSearchUrl(name) {
 
 // 점심 맛집이 목적이라 술집(호프·요리주점·이자카야 등)은 모든 종류에서 뺀다
 const LUNCH_EXCLUDE = ['술집'];
+// 카카오가 패스트푸드로 분류하지 않은 체인점은 이름으로 뺀다
+const EXCLUDE_NAMES = ['파파이스'];
+export const isExcludedName = (name) => EXCLUDE_NAMES.some((x) => String(name ?? '').includes(x));
 
 export function matchesCategory(categoryName, category) {
   const path = String(categoryName ?? '').split(' > ').slice(1).join(' > '); // '음식점' 뒤
