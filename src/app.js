@@ -5,7 +5,8 @@ import { createFetcher, withTimeout } from './kakao.js';
 import { renderTabs, renderList, renderLoading, renderError } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { active: CATEGORIES[0].key, sortBy: 'rank', maxWalk: 0, data: null, fetchFor: null };
+// range: 검색 범위(10·15분), maxWalk: 그 안에서 더 좁히는 필터(5분)
+const state = { active: CATEGORIES[0].key, sortBy: 'rank', range: 10, maxWalk: 0, data: null, fetchFor: null };
 
 export function loadKakaoSdk(appKey) {
   return new Promise((resolve, reject) => {
@@ -19,22 +20,23 @@ export function loadKakaoSdk(appKey) {
 
 function paint() {
   $('tabs').innerHTML = renderTabs(CATEGORIES, state.active);
-  if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), { maxWalk: state.maxWalk });
+  if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), { maxWalk: state.maxWalk, range: state.range });
 }
 
 async function show(key) {
   state.active = key;
+  const { range } = state;
   state.data = null;
   paint();
   $('list').innerHTML = renderLoading();
   try {
-    const data = await state.fetchFor(key);
-    if (state.active !== key) return; // 그 사이 다른 탭을 눌렀으면 무시
+    const data = await state.fetchFor(key, range);
+    if (state.active !== key || state.range !== range) return; // 그 사이 탭이나 범위가 바뀌었으면 무시
     state.data = data;
     paint();
   } catch (e) {
     console.error(e);
-    if (state.active === key) $('list').innerHTML = renderError();
+    if (state.active === key && state.range === range) $('list').innerHTML = renderError();
   }
 }
 
@@ -71,7 +73,12 @@ async function main() {
     if (btn && (btn.dataset.key !== state.active || !state.data)) show(btn.dataset.key);
   });
   $('sortBy')?.addEventListener('change', (ev) => { state.sortBy = ev.target.value; paint(); });
-  $('maxWalk')?.addEventListener('change', (ev) => { state.maxWalk = Number(ev.target.value); paint(); });
+  $('maxWalk')?.addEventListener('change', (ev) => {
+    const v = Number(ev.target.value);
+    const range = v === 15 ? 15 : 10;      // 15분은 범위를 넓혀 다시 검색
+    state.maxWalk = v === 5 ? 5 : 0;       // 5분은 10분 목록에서 걸러내기
+    if (range !== state.range) { state.range = range; show(state.active); } else paint();
+  });
   show(state.active);
 }
 

@@ -23,13 +23,13 @@ function renderCard(x) {
 </li>`;
 }
 
-export function renderList(list, { maxWalk = 0 } = {}) {
+export function renderList(list, { maxWalk = 0, range = WALK_LIMIT_MIN } = {}) {
   if (!list.length) {
     return maxWalk > 0
       ? `<p class="notice">도보 ${maxWalk}분 안에는 식당이 없어요. 거리를 넓혀 보세요.</p>`
       : '<p class="notice">이 종류는 주변에 맛집 정보가 없어요.</p>';
   }
-  const scope = `${ORIGIN_NAME}에서 도보 ${maxWalk > 0 ? maxWalk : WALK_LIMIT_MIN}분 이내 · 카카오 추천순`;
+  const scope = `${ORIGIN_NAME}에서 도보 ${maxWalk > 0 ? maxWalk : range}분 이내 · 카카오 추천순`;
   return `<p class="summary">${list.length}곳 · ${scope}</p><ul class="cards">${list.map(renderCard).join('')}</ul>`;
 }
 

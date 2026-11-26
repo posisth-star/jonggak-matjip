@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CATEGORIES, CENTER, RADIUS_M, ORIGIN_NAME, WALK_LIMIT_MIN } from '../src/categories.js';
+import { CATEGORIES, CENTER, RADIUS_M, RANGES, ORIGIN_NAME, WALK_LIMIT_MIN } from '../src/categories.js';
 import { walkMinutes, matchesCategory } from '../src/places-logic.js';
 
 const cat = (k) => CATEGORIES.find(c => c.key === k);
@@ -8,7 +8,7 @@ const path = (p) => `음식점 > ${p}`;
 
 test('tab order and labels (배달앱식 메뉴 탭)', () => {
   assert.deepEqual(CATEGORIES.map(c => c.label),
-    ['전체', '고기·구이', '국밥·탕', '한정식·찌개', '면 요리', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안', '샐러드·도시락']);
+    ['전체', '국밥·탕', '한정식·찌개', '면 요리', '고기·구이', '중식', '돈까스·회·일식', '양식·피자·버거', '분식', '아시안', '샐러드·도시락']);
 });
 test('every tab: unique key, restaurants only, 1+ search words; 전체 has no path filter', () => {
   assert.equal(new Set(CATEGORIES.map(c => c.key)).size, CATEGORIES.length);
@@ -46,8 +46,9 @@ test('origin is 알파빌딩 (서울 종로구 종로 34)', () => {
   assert.ok(Math.abs(CENTER.lng - 126.9811326) < 0.0002);
   assert.match(ORIGIN_NAME, /알파빌딩/);
 });
-test('radius is the 15-minute walk boundary', () => {
-  assert.equal(WALK_LIMIT_MIN, 15);
-  assert.ok(walkMinutes(RADIUS_M) <= 15);
-  assert.ok(walkMinutes(RADIUS_M + 40) > 15);
+test('default range is 10 minutes; 15-minute range is also available', () => {
+  assert.equal(WALK_LIMIT_MIN, 10);
+  assert.equal(RANGES[10], RADIUS_M);
+  assert.ok(walkMinutes(RANGES[10]) <= 10 && walkMinutes(RANGES[10] + 40) > 10);
+  assert.ok(walkMinutes(RANGES[15]) <= 15 && walkMinutes(RANGES[15] + 40) > 15);
 });

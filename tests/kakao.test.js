@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { searchTop, createFetcher, mergeRanked } from '../src/kakao.js';
-import { CATEGORIES, CENTER, RADIUS_M } from '../src/categories.js';
+import { CATEGORIES, CENTER, RADIUS_M, RANGES } from '../src/categories.js';
 
 const sdk = { toBounds: (r) => r, sortAccuracy: 'ACC', Status: { OK: 'OK', ZERO_RESULT: 'ZERO', ERROR: 'ERR' } };
 const doc = (id, distance = 100, cat = '음식점 > 한식 > 국밥') =>
@@ -101,4 +101,19 @@ test('rejects when keywordSearch throws on a later page', async () => {
   let n = 0;
   const s = (q, cb) => { if (++n === 2) throw new Error('boom'); setTimeout(() => cb(ranked(15), 'OK', { hasNextPage: true }), 0); };
   await assert.rejects(searchTop(s, '국밥', 'FD6', sdk, 1000), /boom/);
+});
+
+test('15-minute range searches a wider square and keeps farther places; cached separately', async () => {
+  const s = byQueryFake({ '국밥': [doc('near', 300), doc('mid', 800)], '곰탕': [], '해장국': [] });
+  const f = createFetcher(s, sdk);
+  const ten = await f('soup');
+  assert.deepEqual(ten.map(x => x.id), ['near']);
+  const n = s.calls.length;
+  const fifteen = await f('soup', 15);
+  assert.deepEqual(fifteen.map(x => x.id), ['near', 'mid']);
+  assert.ok(s.calls.length > n);
+  const wide = s.calls[s.calls.length - 1].o.bounds;
+  assert.ok(Math.abs(wide.ne.lat - (CENTER.lat + RANGES[15] / 111320)) < 1e-6);
+  await f('soup', 15);
+  assert.equal(s.calls.length, n * 2);
 });
