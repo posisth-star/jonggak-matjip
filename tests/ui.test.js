@@ -76,3 +76,12 @@ test('loading shows the character, the message and a progress bar', () => {
   assert.ok(html.includes('width:33%'));
   assert.ok(renderLoading().includes('aria-valuenow="0"'));
 });
+
+test('shuffled list says it is random picks from each menu', () => {
+  const html = renderList([r()], { shuffled: true });
+  assert.ok(html.includes('1곳 · 한국빌딩에서 도보 10분 이내 · 메뉴별 상위 5곳 무작위'));
+  assert.ok(!html.includes('카카오 추천순'));
+  // 가까운 순 등으로 다시 정렬하면 '무작위'는 빼고 '메뉴별 상위 5곳'만
+  const sorted = renderList([r()], { picked: true });
+  assert.ok(sorted.includes('1곳 · 한국빌딩에서 도보 10분 이내 · 메뉴별 상위 5곳</p>'));
+});

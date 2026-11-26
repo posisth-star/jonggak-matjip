@@ -30,7 +30,11 @@ function paint() {
   $('tabs').innerHTML = renderTabs(CATEGORIES, state.active);
   if (focusedKey) $('tabs').querySelector(`[data-key="${focusedKey}"]`)?.focus({ preventScroll: true });
   updateTabFade();
-  if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), { maxWalk: state.maxWalk, range: state.range });
+  // 추천 탭은 메뉴별 상위 5곳을 섞은 목록: 기본 정렬이면 '무작위', 다른 정렬이면 '메뉴별 상위 5곳'으로 표시
+  const picked = !!CATEGORIES.find((c) => c.key === state.active)?.aggregate;
+  if (state.data) $('list').innerHTML = renderList(sortRestaurants(filterByWalk(state.data, state.maxWalk), state.sortBy), {
+    maxWalk: state.maxWalk, range: state.range, shuffled: picked && state.sortBy === 'rank', picked,
+  });
 }
 
 async function show(key) {

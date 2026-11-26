@@ -124,26 +124,37 @@ test('파파이스 is removed by name even though Kakao files it under 양식 > 
   assert.deepEqual(out.map(x => x.id), ['b']);
 });
 
-// ---- 추천 = 9개 메뉴 탭을 합친 목록 ----
-test('추천 tab loads every menu tab, interleaves their ranks, reports progress, and reuses them', async () => {
-  const byQuery = {
-    '국밥': [doc('s1', 100, '음식점 > 한식 > 국밥'), doc('s2', 100, '음식점 > 한식 > 국밥')],
-    '칼국수': [doc('n1', 100, '음식점 > 한식 > 국수 > 칼국수')],
-    '중식': [doc('c1', 100, '음식점 > 중식 > 중국요리'), doc('s1', 100, '음식점 > 한식 > 국밥')],
-  };
+// ---- 추천 = 9개 메뉴 탭 각각의 상위 5곳을 모아 무작위 순서로 ----
+const soupDocs = Array.from({ length: 7 }, (_, i) => doc('s' + i, 100, '음식점 > 한식 > 국밥'));
+const aggQuery = {
+  '국밥': soupDocs,
+  '칼국수': [doc('n1', 100, '음식점 > 한식 > 국수 > 칼국수')],
+  '중식': [doc('c1', 100, '음식점 > 중식 > 중국요리'), doc('s0', 100, '음식점 > 한식 > 국밥')],
+};
+const aggSearch = (calls) => (q, cb, o) => { calls.push(q); const d = o.page === 1 ? (aggQuery[q] ?? []) : []; setTimeout(() => cb(d, d.length ? 'OK' : 'ZERO', { hasNextPage: false }), 0); };
+
+test('추천 tab takes the top 5 of every menu tab, without rank, reports progress, and reuses them', async () => {
   const calls = [];
-  const s = (q, cb, o) => { calls.push(q); const d = o.page === 1 ? (byQuery[q] ?? []) : []; setTimeout(() => cb(d, d.length ? 'OK' : 'ZERO', { hasNextPage: false }), 0); };
-  const f = createFetcher(s, sdk);
+  // random이 항상 0.999면 섞어도 순서가 그대로 → 탭 순서대로 모은 순서를 확인할 수 있다
+  const f = createFetcher(aggSearch(calls), sdk, { random: () => 0.999 });
   const progress = [];
   const out = await f('all', 10, { onProgress: (done, total) => progress.push([done, total]) });
   const menuTabs = CATEGORIES.filter(c => c.key !== 'all');
   assert.equal(progress.length, menuTabs.length);
   assert.deepEqual(progress[progress.length - 1], [menuTabs.length, menuTabs.length]);
-  // 탭 순서대로 1위끼리 먼저: 국밥·탕 1위(s1), 면 1위(n1), 중식 1위(c1), 그다음 국밥·탕 2위(s2). 중식 탭의 s1은 중복이라 한 번만
-  assert.deepEqual(out.map(x => x.id), ['s1', 'n1', 'c1', 's2']);
-  assert.deepEqual(out.map(x => x.rank), [1, 2, 3, 4]);
+  // 국밥·탕은 7곳 중 상위 5곳만, 중식 탭의 s0은 중복이라 한 번만
+  assert.deepEqual(out.map(x => x.id), ['s0', 's1', 's2', 's3', 's4', 'n1', 'c1']);
+  assert.ok(out.every(x => x.rank === undefined)); // 무작위라 'N위' 배지를 달지 않는다
   const n = calls.length;
-  await f('soup', 10);
+  const soup = await f('soup', 10);
   await f('chinese', 10);
   assert.equal(calls.length, n); // 탭을 눌러도 이미 받아 둔 걸 써서 추가 호출 없음
+  assert.equal(soup.length, 7); // 국밥·탕 탭 자체는 전부 보여준다
+});
+
+test('추천 tab shuffles the picked places', async () => {
+  const f = createFetcher(aggSearch([]), sdk, { random: () => 0 });
+  const out = await f('all', 10);
+  assert.deepEqual(new Set(out.map(x => x.id)), new Set(['s0', 's1', 's2', 's3', 's4', 'n1', 'c1']));
+  assert.notDeepEqual(out.map(x => x.id), ['s0', 's1', 's2', 's3', 's4', 'n1', 'c1']);
 });

@@ -21,6 +21,18 @@ export function mergeRanked(lists) {
   return out;
 }
 
+// 피셔-예이츠 섞기(random은 테스트에서 바꿔 끼울 수 있게 받는다)
+export function shuffle(list, random = Math.random) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export const PICKS_PER_TAB = 5; // 추천 탭: 메뉴 탭마다 상위 몇 곳을 뽑을지
+
 // 반경을 감싸는 정사각형 범위
 export function squareAround(center, radiusM) {
   const dLat = radiusM / 111320;
@@ -63,11 +75,13 @@ export function createFetcher(keywordSearch, sdk, options = {}) {
     if (!category) return Promise.reject(new Error(`알 수 없는 종류: ${categoryKey}`));
     let p;
     if (category.aggregate) {
-      // 추천: 메뉴 탭을 모두 받아(각 탭은 캐시에 남음) 탭 순서대로 1위끼리·2위끼리 번갈아 합친다
+      // 추천: 메뉴 탭을 모두 받아(각 탭은 캐시에 남음) 탭마다 상위 5곳을 모아 무작위로 섞는다.
+      // 카카오 순서는 검색 정확도일 뿐 인기 순위가 아니라서 'N위'는 달지 않는다.
       const tabs = CATEGORIES.filter((c) => !c.aggregate);
       let done = 0;
       p = Promise.all(tabs.map((t) => fetchTab(t.key, rangeMin).then((list) => { done += 1; onProgress?.(done, tabs.length); return list; })))
-        .then((lists) => dedupeById(mergeRanked(lists)).map((r, i) => ({ ...r, rank: i + 1 })));
+        .then((lists) => shuffle(dedupeById(lists.flatMap((l) => l.slice(0, PICKS_PER_TAB))), options.random)
+          .map(({ rank, ...r }) => r));
     } else {
       // 탭의 검색어마다 상위 45곳을 받아, 1위끼리·2위끼리 번갈아 합친다
       p = Promise.all(category.queries.map((q) =>

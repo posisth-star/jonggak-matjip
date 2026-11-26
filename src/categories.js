@@ -14,7 +14,7 @@ export const RADIUS_M = RANGES[WALK_LIMIT_MIN];
 const tab = (key, label, queries, paths) => ({ key, label, queries, groupCode: 'FD6', paths });
 
 export const CATEGORIES = [
-  // 추천: 아래 9개 메뉴 탭을 모두 불러와 1위끼리·2위끼리 번갈아 합친 목록(aggregate).
+  // 추천: 아래 9개 메뉴 탭을 모두 불러와 탭마다 상위 5곳을 모아 무작위로 섞은 목록(aggregate).
   // 팀 전용이라 첫 화면 호출이 늘어도 괜찮고, 한 번 받으면 다른 탭은 추가 호출 없이 바로 보인다.
   { ...tab('all', '추천', [], null), exclude: ['패스트푸드', '간식', '식품판매'], aggregate: true },
   tab('soup', '국밥·탕', ['국밥', '곰탕', '해장국'], ['한식 > 국밥', '한식 > 곰탕', '한식 > 설렁탕', '한식 > 해장국', '한식 > 감자탕', '한식 > 순대']),
