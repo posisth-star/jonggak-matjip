@@ -69,3 +69,9 @@ test('전체 category excludes fast food, bakery/snacks and food shops', () => {
   assert.equal(matchesCategory('음식점 > 식품판매', all), false);
   assert.equal(matchesCategory('음식점 > 한식 > 국밥', all), true);
 });
+
+test('bars are excluded from every category (lunch only)', () => {
+  for (const c of CATS) assert.equal(matchesCategory('음식점 > 술집 > 호프,요리주점', c), false, c.key);
+  assert.equal(matchesCategory('음식점 > 술집 > 일본식주점', CATS.find(c => c.key === 'all')), false);
+  assert.equal(matchesCategory('음식점 > 한식 > 국밥', CATS.find(c => c.key === 'all')), true);
+});

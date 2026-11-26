@@ -20,8 +20,12 @@ export function naverSearchUrl(name) {
   return NAVER_SEARCH + encodeURIComponent(`${name} 종각`);
 }
 
+// 점심 맛집이 목적이라 술집(호프·요리주점·이자카야 등)은 모든 종류에서 뺀다
+const LUNCH_EXCLUDE = ['술집'];
+
 export function matchesCategory(categoryName, category) {
   const second = String(categoryName ?? '').split(' > ')[1] ?? '';
+  if (LUNCH_EXCLUDE.some((x) => second.includes(x))) return false;
   if (category.exclude?.some((x) => second.includes(x))) return false; // 전체 탭: 패스트푸드·간식·식품판매 제외
   if (category.match == null) return true;
   return second.includes(category.match);
