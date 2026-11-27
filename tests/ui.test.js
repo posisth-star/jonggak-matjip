@@ -48,7 +48,8 @@ test('renderList summary mentions walk filter', () => {
 
 test('top mode shows rank badge and summary', () => {
   const html = renderList([r({ rank: 2 })]);
-  assert.ok(html.includes('추천 2위'));
+  assert.ok(html.includes('<span class="rank">2</span>')); // 카카오 순서는 인기 순위가 아니라 '추천 N위' 대신 번호만
+  assert.ok(!html.includes('2위'));
   assert.ok(html.includes('1곳 · 한국빌딩에서 도보 10분 이내 · 카카오 추천순'));
 });
 test('top mode with walk filter summary', () => {
